@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能语义问答引擎- 通元智策</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 85%;
+            max-width: 700px;
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .logo img {
+            max-width: 280px;
+            max-height: 70px;
+            object-fit: contain;
+            left: 1px;
+            top: 5px;
+            position: relative;
+        }
+        .tagline {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .tagline .spacer {
+            display: inline-block;
+            width: 10px;
+        }
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .search-input {
+            width: 100%;
+            padding: 25px 25px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            color: #333;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: left;
+            text-indent: 10px;
+        }
+        .ai-toggle {
+            position: absolute;
+            left: 0;
+            bottom: -30px; /* 放在搜索框下方 */
+            display: flex;
+            align-items: center;
+            color: #4CAF50;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .ai-toggle .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .ai-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 8px 0;
+            display: none;
+            width: 150px; /* Increased width for longer names */
+            z-index: 100;
+        }
+        .ai-dropdown.show {
+            display: block;
+        }
+        .ai-option {
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+        .ai-option:hover {
+            background-color: #f5f5f5;
+        }
+        .ai-option.active {
+            background-color: #e8f5e9;
+        }
+        .ai-option .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .ai-option .default-dot {
+            background-color: #4CAF50;
+        }
+        .ai-option .deepseek-dot {
+            background-color: #2196F3;
+        }
+        .ai-option .glm-4-air-dot {
+            background-color: #FF9800; /* Orange color for GLM-4-Air */
+        }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 80%;
+            margin: 10px auto; 
+        }
+        .feature-box {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 15px 13px;
+            text-align: left;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-box:hover {
+            background-color: #f9f9f9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .feature-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+        .feature-title svg {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+        }
+        .feature-desc {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 600px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+            .search-input {
+                padding: 15px 20px;
+            }
+            .container {
+                width: 90%;
+            }
+        }
+        
+        .logo-control-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .send-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .send-button:hover {
+            background-color: #45a049;
+        }
+        
+        .search-container {
+            margin-bottom: 40px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="height: 35px;"></div>
+        <div class="logo">
+            <img src="images/logo.png" id="logo-img" alt="通元智策 Logo" />
+        </div>
+        <div class="tagline">通元智策 <span class="spacer"></span> 智掌乾坤</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="询问产品信息、政策要求、常见问题...">
+            <button id="sendButton" class="send-button">发送</button>
+            <div class="ai-toggle" id="aiToggle">
+                <div class="dot"></div>
+                <span id="currentAiName">默认AI</span>
+                <div class="ai-dropdown" id="aiDropdown">
+                    <div class="ai-option active" data-ai="default">
+                        <div class="dot default-dot"></div>
+                        <span>默认AI</span>
+                    </div>
+                    <div class="ai-option" data-ai="deepseek">
+                        <div class="dot deepseek-dot"></div>
+                        <span>DeepSeek</span>
+                    </div>
+                    <div class="ai-option" data-ai="glm-4-air">
+                        <div class="dot glm-4-air-dot"></div>
+                        <span>GLM-4-Air</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-box">
+                <div class="feature-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4V20M18 6L6 18M20 12H4M18 18L6 6" stroke="#555" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    产品知识库
+                </div>
+                <div class="feature-desc">快速查询产品详情、特点与风险提示</div>
+            </div>
+            
+            <div class="feature-box">
+                <div class="feature-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 5L9 2L15 5L22 2V17L15 21L9 17L2 20V5Z" stroke="#555" stroke-width="2" stroke-linejoin="round" />
+                        <path d="M9 17V2M15 21V5" stroke="#555" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    政策指南
+                </div>
+                <div class="feature-desc">查询内外部规章制度与监管要求</div>
+            </div>
+            
+            <div class="feature-box">
+                <div class="feature-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="16" rx="2" stroke="#555" stroke-width="2" />
+                        <path d="M3 10H21M8 15H16M12 4V20" stroke="#555" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    客服助手
+                </div>
+                <div class="feature-desc">辅助坐席回答客户问题与处理流程</div>
+            </div>
+            
+            <div class="feature-box">
+                <div class="feature-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3V5M19.071 19.071L17.657 17.657M21 12H19M4 12H6M16.364 7.636L14.95 9.05M12 21V19M4.929 19.071L6.343 17.657M7.636 7.636L9.05 9.05" stroke="#555" stroke-width="2" stroke-linecap="round" />
+                        <circle cx="12" cy="12" r="4" stroke="#555" stroke-width="2" />
+                    </svg>
+                    学习中心
+                </div>
+                <div class="feature-desc">新员工学习与内部知识快速获取</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="logoControlPanel" class="logo-control-panel">
+        <div style="margin-bottom: 10px;">
+            <label>Logo位置: </label>
+            <button id="moveLeft">←</button>
+            <button id="moveRight">→</button>
+            <button id="moveUp">↑</button>
+            <button id="moveDown">↓</button>
+        </div>
+        <div>
+            <label>Logo大小: </label>
+            <button id="smaller">-</button>
+            <button id="bigger">+</button>
+        </div>
+        <div style="margin-top: 10px;">
+            <label>显示控制面板: </label>
+            <input type="checkbox" id="togglePanelCheckbox">
+        </div>
+    </div>
+
+    <script>
+        // AI切换功能
+        const aiToggle = document.getElementById('aiToggle');
+        const aiDropdown = document.getElementById('aiDropdown');
+        const currentAiName = document.getElementById('currentAiName');
+        let currentAi = 'default'; // Default AI
+        const aiOptionsConfig = {
+            'default': { name: '默认AI', color: '#4CAF50' },
+            'deepseek': { name: 'DeepSeek', color: '#2196F3' },
+            'glm-4-air': { name: 'GLM-4-Air', color: '#FF9800' } // Added GLM-4-Air
+        };
+
+        aiToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            aiDropdown.classList.toggle('show');
+        });
+        
+        document.querySelectorAll('.ai-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const aiType = this.getAttribute('data-ai');
+                if (!aiType || !aiOptionsConfig[aiType]) return;
+
+                currentAi = aiType;
+                currentAiName.textContent = aiOptionsConfig[aiType].name;
+                
+                document.querySelectorAll('.ai-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const dot = aiToggle.querySelector('.dot');
+                if (dot) {
+                    dot.style.backgroundColor = aiOptionsConfig[aiType].color;
+                }
+                
+                aiDropdown.classList.remove('show');
+            });
+        });
+        
+        document.addEventListener('click', function() {
+            if (aiDropdown.classList.contains('show')) {
+                aiDropdown.classList.remove('show');
+            }
+        });
+        
+        // Initialize default AI display
+        currentAiName.textContent = aiOptionsConfig[currentAi].name;
+        const initialDot = aiToggle.querySelector('.dot');
+        if (initialDot) {
+            initialDot.style.backgroundColor = aiOptionsConfig[currentAi].color;
+        }
+
+        // 消息发送功能
+        const searchInput = document.getElementById('searchInput');
+        const sendButton = document.getElementById('sendButton');
+        const API_ENDPOINT = 'http://localhost:8000/agent/query'; // This will be overridden by React app's logic if it takes over this functionality
+
+        async function sendMessage() {
+            const question = searchInput.value.trim();
+            if (!question) {
+                alert('请输入问题后再发送。');
+                return;
+            }
+
+            searchInput.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                const requestBody = { 
+                    question: question,
+                    ai_type: currentAi  
+                };
+
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: '无法解析错误信息' }));
+                    throw new Error(`API 请求失败，状态码: ${response.status}. 错误: ${errorData.detail || response.statusText}`);
+                }
+                alert('已成功发送问题！'); // Placeholder for actual response handling
+
+            } catch (error) {
+                console.error('查询失败:', error);
+                alert(`查询出错: ${error.message}`);
+            } finally {
+                searchInput.value = ''; 
+                searchInput.disabled = false;
+                sendButton.disabled = false;
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Logo控制面板功能
+        const controlPanel = document.getElementById('logoControlPanel');
+        const logoImg = document.getElementById('logo-img');
+        const togglePanelCheckbox = document.getElementById('togglePanelCheckbox');
+        
+        let xPos = 1; 
+        let yPos = 5;   
+        let logoWidth = 280;
+        logoImg.style.left = xPos + 'px';
+        logoImg.style.top = yPos + 'px';
+        logoImg.style.maxWidth = logoWidth + 'px';
+
+        togglePanelCheckbox.addEventListener('change', function() {
+            controlPanel.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        document.getElementById('moveLeft').addEventListener('click', function() { xPos -= 5; logoImg.style.left = xPos + 'px'; });
+        document.getElementById('moveRight').addEventListener('click', function() { xPos += 5; logoImg.style.left = xPos + 'px'; });
+        document.getElementById('moveUp').addEventListener('click', function() { yPos -= 5; logoImg.style.top = yPos + 'px'; });
+        document.getElementById('moveDown').addEventListener('click', function() { yPos += 5; logoImg.style.top = yPos + 'px'; });
+        document.getElementById('smaller').addEventListener('click', function() { logoWidth = Math.max(100, logoWidth - 10); logoImg.style.maxWidth = logoWidth + 'px'; });
+        document.getElementById('bigger').addEventListener('click', function() { logoWidth += 10; logoImg.style.maxWidth = logoWidth + 'px'; });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+                e.preventDefault(); 
+                togglePanelCheckbox.checked = !togglePanelCheckbox.checked;
+                controlPanel.style.display = togglePanelCheckbox.checked ? 'block' : 'none';
+            }
+        });
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
